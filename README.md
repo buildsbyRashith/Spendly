@@ -1,50 +1,82 @@
-# Welcome to your Expo app 👋
+💰 Spendly
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Spendly is a simple and intuitive expense tracker app that helps you take control of your personal finances.
+Easily log your expenses, organize them by category, and visualize your spending patterns through interactive charts and graphs.
 
-## Get started
+✨ Features
 
-1. Install dependencies
+🧾 Add Expenses: Quickly add expenses with amount, category, and notes.
 
-   ```bash
-   npm install
-   ```
+🗂️ Categorization: Organize spending under categories like Food, Travel, Bills, and more.
 
-2. Start the app
+📊 Visual Insights: View all your expenses as beautiful graphical statistics.
 
-   ```bash
-   npx expo start
-   ```
+🔍 Track Spending Patterns: Analyze your monthly and category-wise spending at a glance.
 
-In the output, you'll find options to open the app in a
+💾 Persistent Storage: All data remains saved locally (or via backend integration, if connected).
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+🖼️ Screenshots
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+( screenshots or a demo GIF will be here once UI is ready)
 
-## Get a fresh project
 
-When you're ready, run:
 
-```bash
-npm run reset-project
-```
+🛠️ Tech Stack
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Frontend: React Native + NativeWind (Tailwind CSS for styling)
 
-## Learn more
+Charts: Victory Native / React Native Chart Kit (or your chosen library)
 
-To learn more about developing your project with Expo, look at the following resources:
+State Management: Context API or Redux
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Storage: AsyncStorage / SQLite (depending on setup)
 
-## Join the community
+🚀 Getting Started
+1. Clone the Repository
+git clone https://github.com/yourusername/spendly.git
+cd spendly
 
-Join our community of developers creating universal apps.
+2. Install Dependencies
+npm install
+# or
+yarn install
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+3. Run the App
+npx expo start
+
+📈 Future Enhancements
+
+💡 Budget planning & monthly limits
+
+🔔 Smart notifications for overspending
+
+☁️ Cloud sync and multi-device support
+
+📅 Expense history with filters and sorting
+
+🤝 Contributing
+
+Contributions are welcome!
+If you’d like to improve Spendly, please fork the repo and create a pull request.
+
+Fork the project
+
+Create your feature branch (git checkout -b feature/new-feature)
+
+Commit your changes (git commit -m 'Add new feature')
+
+Push to the branch (git push origin feature/new-feature)
+
+Open a Pull Request
+
+🧑‍💻 Author
+
+Rashith Perera
+📸 Instagram
+
+💼 GitHub
+
+📜 License
+
+This project is licensed under the MIT License — see the LICENSE
+ file for details.

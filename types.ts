@@ -148,6 +148,7 @@ export type AuthContextType = {
     name: string
   ) => Promise<{ success: boolean; msg?: string }>;
   updateUserData: (userId: string) => Promise<void>;
+  initialized: boolean
 };
 
 export type ResponseType = {

@@ -6,10 +6,12 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { createContext, useContext, useEffect, useState } from "react";
 
 
-const AuthContext = createContext<AuthContextType | null>(null);
+// create context as any so we can add `initialized` without touching types file
+const AuthContext = createContext<any>(null);
 
 export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
     const [user, setUser] = useState<UserType>(null);
+    const [initialized, setInitialized] = useState<boolean>(false);
 
     const router = useRouter()
 
@@ -22,12 +24,13 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) 
                     email: firebaseUser?.email,
                     name: firebaseUser?.displayName
                 })
-                router.replace("/(tabs)")
             } else {
                 // no user
                 setUser(null)
-                router.replace("/(auth)/welcome")
             }
+
+             // Mark that auth finished initial check (first call)
+            setInitialized(true)
         })
 
         return () => unsub()
@@ -36,6 +39,8 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) 
     const login = async (email: string, password: string) => {
         try {
             await signInWithEmailAndPassword(auth, email, password);
+            // navigate on success
+          router.replace('/(tabs)')
             return { success: true }
         } catch (error: any) {
             let msg = error.message;
@@ -51,6 +56,8 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) 
                 email,
                 uid: response?.user?.uid,    
             })
+            // navigate on success
+          router.replace('/(tabs)')
             return { success: true }
         } catch (error: any) {
             let msg = error.message;
@@ -85,7 +92,8 @@ export const AuthProvider: React.FC<{children: React.ReactNode}> = ({children}) 
         setUser,
         login,
         register,
-        updateUserData
+        updateUserData,
+        initialized
     }
     return (
         <AuthContext.Provider value={contextValue}>

@@ -11,28 +11,28 @@ export default function CustomTabs({ state, descriptors, navigation }: BottomTab
   const tabbarIcons: any = {
     index: (isFocused: boolean) => (
       <Icons.HouseIcon
-        size={verticalScale(30)}
+        size={verticalScale(25)}
         weight={isFocused? "fill" : "regular"}
         color={isFocused ? colors.primary : colors.neutral400}
       />
     ),
     statistics: (isFocused: boolean) => (
       <Icons.ChartBarIcon
-        size={verticalScale(30)}
+        size={verticalScale(25)}
         weight={isFocused? "fill" : "regular"}
         color={isFocused ? colors.primary : colors.neutral400}
       />
     ),
     wallet: (isFocused: boolean) => (
       <Icons.WalletIcon
-        size={verticalScale(30)}
+        size={verticalScale(25)}
         weight={isFocused? "fill" : "regular"}
         color={isFocused ? colors.primary : colors.neutral400}
       />
     ),
     profile: (isFocused: boolean) => (
       <Icons.UserIcon
-        size={verticalScale(30)}
+        size={verticalScale(25)}
         weight={isFocused? "fill" : "regular"}
         color={isFocused ? colors.primary : colors.neutral400}
       />

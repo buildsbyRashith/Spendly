@@ -1,5 +1,5 @@
 import React from 'react'
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Typo from './Typo'
 import { WalletType } from '@/types'
 import { Router } from 'expo-router'
@@ -7,22 +7,62 @@ import { verticalScale } from '@/utils/styling'
 import { colors, spacingX } from '@/constants/theme'
 import * as Icons from 'phosphor-react-native'
 import Animated, { FadeInDown } from 'react-native-reanimated'
+import { RectButton, Swipeable } from 'react-native-gesture-handler'
+import { deleteWallet } from '@/services/walletService'
 
 
 const WalletListItem = ({
     item,
     index,
-    router
+    router,
+    onDelete
 }: {
     item: WalletType,
     index: number,
-    router: Router
+    router: Router,
+    onDelete: (id: string) => void
 }) => {
+
+  const handleDeleteWallet = (id: string) => {
+    Alert.alert(
+      'Delete wallet',
+      `Are you sure you want to delete "${item.name}"?`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            const res = await deleteWallet(id)
+            if (res.success) {
+              if (onDelete) {
+                onDelete(id) // parent should remove from state
+              } else {
+               // console.warn('WalletListItem: onDelete not provided, wallet removed from backend but UI not updated', id)
+              }
+            } else {
+              Alert.alert('Delete failed', res.msg || 'Unknown error')
+            }
+          }
+        }
+      ]
+    )
+  }
+
+    const renderLeftActions = () => {
+    return (
+      <RectButton style={styles.leftAction} onPress={() => handleDeleteWallet(item.id)}>
+        <Icons.TrashSimpleIcon size={verticalScale(20)} color={colors.white} weight="bold" />
+        <Text style={styles.leftActionText}>Delete</Text>
+      </RectButton>
+    )
+  }
     
   return (
     <Animated.View entering={FadeInDown.delay(index*250)}>
-      <TouchableOpacity style={styles.container}>
-        <View style={styles.imageContainer}>
+      <Swipeable renderLeftActions={renderLeftActions} overshootLeft={false}>
+        <TouchableOpacity style={styles.container}>
+          <View style={styles.imageContainer}>
             <Typo style={styles.emoji}>{item.image}</Typo>
         </View>
         <View style={styles.nameContainer}>
@@ -35,6 +75,7 @@ const WalletListItem = ({
             color={colors.white}
         />
       </TouchableOpacity>
+      </Swipeable>
     </Animated.View>
   )
 }
@@ -47,8 +88,8 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginBottom: verticalScale(17),
         padding: spacingX._15,
-        backgroundColor: colors.container,  // Entire container background
-        borderRadius: 12,  // Rounded corners
+        backgroundColor: colors.neutral800,  // Entire container background
+        borderRadius: 25,  // Rounded corners
     },
 
     imageContainer: {
@@ -64,6 +105,23 @@ const styles = StyleSheet.create({
     },
 
     emoji: {
-        fontSize: 34,  // Adjust size as needed
+        fontSize: 45,  // Adjust size as needed
     },
+
+    leftAction: {
+      backgroundColor: '#df2b21f8',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: verticalScale(90),
+      borderRadius: 12,
+      marginBottom: verticalScale(17),
+      marginRight: spacingX._10,
+      flexDirection: 'row',
+      gap: 8,
+    },
+
+    leftActionText: {
+      color: colors.white,
+      fontWeight: '600',
+    }
 })

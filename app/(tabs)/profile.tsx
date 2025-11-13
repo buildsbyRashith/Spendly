@@ -30,7 +30,7 @@ const Profile = () => {
             weight='fill'
         />
       ),
-      routeName: "/(model)/profileModel",
+      routeName: "/(modals)/profileModal",
       bgColor: "#6366f1",
     },
     {
@@ -95,6 +95,8 @@ const Profile = () => {
     if (item.title == "Logout"){
       showLogoutAlert()
     }
+
+    if(item.routeName) router.replace(item.routeName)
   }
 
   return (

@@ -41,7 +41,7 @@ const Login = () => {
   return (
     <ScreenWrapper>
         <View style={styles.container}>
-        <BackButton iconSize={28} />
+        <BackButton iconSize={28} onPress={() => router.back()} />
 
           <View style={{ gap: 5, marginTop: spacingY._20 }}>
             <Typo size={30} fontWeight={"800"}>

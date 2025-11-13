@@ -5,8 +5,11 @@ import { verticalScale } from '@/utils/styling'
 import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import * as Icons from 'phosphor-react-native'
+import { useRouter } from 'expo-router'
 
 const Wallet = () => {
+
+  const router = useRouter()
 
 const getTotalBalance = () => {
   return 2344
@@ -31,7 +34,7 @@ const getTotalBalance = () => {
               {/* Header */}
               <View style={styles.flexRow}>
                   <Typo size={20} fontWeight={"500"}>My Wallets</Typo>
-                  <TouchableOpacity>
+                  <TouchableOpacity onPress={() => router.push("/(modals)/walletModal")}>
                   <Icons.PlusCircleIcon 
                     weight='fill'
                     color={colors.primary}

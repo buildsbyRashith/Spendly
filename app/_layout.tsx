@@ -20,6 +20,7 @@ const StackLayout = () => {
 
 export default function RootLayout() {
   return (
+
     <AuthProvider>
       <StackLayout />
     </AuthProvider>

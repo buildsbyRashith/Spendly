@@ -1,6 +1,6 @@
 import { ResponseType, WalletType } from "@/types";
 import { uploadFileToCloudinary } from "./imageServices";
-import { collection, doc, setDoc } from "firebase/firestore";
+import { collection, doc, setDoc} from "firebase/firestore";
 import { firestore } from "@/config/firebase";
 
 export const createOrUpdateWallet = async (

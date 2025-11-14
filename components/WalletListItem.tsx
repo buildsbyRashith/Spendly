@@ -26,7 +26,7 @@ const WalletListItem = ({
   const handleDeleteWallet = (id: string) => {
     Alert.alert(
       'Delete wallet',
-      `Are you sure you want to delete "${item.name}"?`,
+      `Are you sure you want to delete "${item.name} wallet"?`,
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -36,7 +36,7 @@ const WalletListItem = ({
             const res = await deleteWallet(id)
             if (res.success) {
               if (onDelete) {
-                onDelete(id) // parent should remove from state
+                onDelete(id) 
               } else {
                // console.warn('WalletListItem: onDelete not provided, wallet removed from backend but UI not updated', id)
               }
@@ -48,6 +48,17 @@ const WalletListItem = ({
       ]
     )
   }
+
+    const openWallet = () => {
+      router.push({
+        pathname: "/(modals)/walletModal",
+        params: {
+          id: item?.id,
+          name: item?.name,
+          image: item?.image
+        }
+      })
+    }
 
     const renderLeftActions = () => {
     return (
@@ -61,13 +72,13 @@ const WalletListItem = ({
   return (
     <Animated.View entering={FadeInDown.delay(index*250)}>
       <Swipeable renderLeftActions={renderLeftActions} overshootLeft={false}>
-        <TouchableOpacity style={styles.container}>
+        <TouchableOpacity style={styles.container} onPress={openWallet}>
           <View style={styles.imageContainer}>
             <Typo style={styles.emoji}>{item.image}</Typo>
         </View>
         <View style={styles.nameContainer}>
             <Typo size={16}>{item.name}</Typo>
-            <Typo size={16} color={colors.neutral400}>${item.amount}</Typo>
+            <Typo size={16} color={colors.neutral400}>QAR {item.amount}</Typo>
         </View>
         <Icons.CaretRightIcon 
             size={verticalScale(20)}

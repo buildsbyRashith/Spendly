@@ -3,14 +3,14 @@ import Header from '@/components/Header'
 import ModalWrapper from '@/components/ModalWrapper'
 import { colors, spacingX, spacingY } from '@/constants/theme'
 import { scale, verticalScale } from '@/utils/styling'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Typo from '@/components/Typo'
 import Input from '@/components/Input'
 import { WalletType } from '@/types'
 import Button from '@/components/Button'
 import { useAuth } from '@/contexts/authContext'
-import { useRouter } from 'expo-router'
+import { useLocalSearchParams, useRouter } from 'expo-router'
 import ImageUpload from '@/components/ImageUpload'
 import { createOrUpdateWallet } from '@/services/walletService'
 
@@ -27,6 +27,19 @@ const [wallet, setWallet] = useState<WalletType>({
 
 const [loading, setLoading] = useState(false)
 
+const oldWallet: { name: string; image: string; id: string  } = 
+  useLocalSearchParams()
+  //console.log('old Wallet: ', oldWallet)
+
+useEffect(() => {
+  if(oldWallet?.id){
+    setWallet({
+      name: oldWallet?.name,
+      image: oldWallet?.image,
+    })
+  }
+}, [])
+
 const onSubmit = async () => {
     let {name, image} = wallet
     if(!name.trim() || !image){
@@ -39,8 +52,9 @@ const onSubmit = async () => {
       image,
       uid: user?.uid
     }
-    // to do : include wallet id if updating
-
+    //  wallet id if updating
+    if(oldWallet?.id) data.id = oldWallet.id
+    
     setLoading(true)
     const res = await createOrUpdateWallet(data)
     setLoading(false)
@@ -56,7 +70,7 @@ const onSubmit = async () => {
     <ModalWrapper>
       <View style={styles.container}>
           <Header 
-            title='New Wallet' 
+            title={oldWallet?.id ? 'Edit Wallet' : 'New Wallet'} 
             leftIcon={<BackButton onPress={() => router.back()} />}
             style={{ marginBottom: spacingY._10 }}
            />
@@ -84,7 +98,8 @@ const onSubmit = async () => {
       </View>
       <View style={styles.footer}>
           <Button onPress={onSubmit} style={{ flex: 1}}>
-            <Typo color={colors.black} fontWeight={"700"} size={18}>{loading ? 'Hang on...' : 'Add Wallet'}</Typo>
+            <Typo color={colors.black} fontWeight={"700"} size={18}>
+              {loading ? 'Hang on...' : oldWallet?.id ? 'Update Wallet' : 'Add Wallet'}</Typo>
           </Button>
       </View>
       

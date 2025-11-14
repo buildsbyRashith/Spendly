@@ -9,6 +9,7 @@ import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-nati
 import * as Icons from 'phosphor-react-native'
 import HomeCard from '@/components/HomeCard'
 import TransactionList from '@/components/TransactionList'
+import Button from '@/components/Button'
 
 const Home = () => {
 
@@ -55,6 +56,14 @@ const Home = () => {
 
       </ScrollView>
 
+      <Button 
+        style={styles.floatingButton} onPress={() => router.push("/(modals)/transactionModal")}>
+          <Icons.PlusIcon 
+            size={verticalScale(24)}
+            weight="bold"
+            color={colors.black}
+          />
+      </Button>
       </View>
     </ScreenWrapper>
   )

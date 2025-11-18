@@ -33,7 +33,6 @@ export const createOrUpdateWallet = async (
                 return {success: true, data: { ...walletToSave, id: walletRef.id }}
 
     } catch (error: any){
-        console.log("error creating or updating wallet: ", error)
         return { success: false, msg: error.message}
     }
 }
@@ -47,7 +46,6 @@ export const deleteWallet = async (id?: string): Promise<ResponseType> => {
     await deleteDoc(walletRef)
     return { success: true, data: { id } }
   } catch (error: any) {
-    console.log("error deleting wallet: ", error)
     return { success: false, msg: error.message }
   }
 }

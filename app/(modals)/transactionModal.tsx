@@ -3,8 +3,8 @@ import Header from '@/components/Header'
 import ModalWrapper from '@/components/ModalWrapper'
 import { colors, radius, spacingX, spacingY } from '@/constants/theme'
 import { scale, verticalScale } from '@/utils/styling'
-import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
+import { ActivityIndicator, Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Typo from '@/components/Typo'
 import Input from '@/components/Input'
 import { TransactionType, WalletType } from '@/types'
@@ -18,6 +18,7 @@ import { expenseCategories, transactionTypes } from '@/constants/data'
 import useFetchData from '@/hooks/useFetchData'
 import { orderBy, where } from 'firebase/firestore'
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { createOrUpdateTransaction } from '@/services/transactionService'
 
 
 const TransactionModal = () => {
@@ -25,6 +26,11 @@ const TransactionModal = () => {
 const router = useRouter()
 
 const { user } = useAuth()
+const scrollViewRef = useRef<ScrollView>(null)
+const amountInputRef = useRef<View>(null)
+const descriptionInputRef = useRef<View>(null)
+
+
 const [transaction, setTransaction] = useState<TransactionType>({
   type: 'expense',
   amount: 0,
@@ -64,34 +70,46 @@ const oldTransaction: { name: string; image: string; id: string  } =
 //}, [])
 
 const onSubmit = async () => {
-//    let {name, image} = transaction
-//    if(!name.trim() || !image){
-//      Alert.alert("Wallet", "Please fill all the fields")
-//      return
-//    }
+  const {type, amount, description, category, date, walletId, image} = transaction
 
-//    const data: WalletType = {
-//      name,
-//      image,
-//      uid: user?.uid
-//    }
-    //  wallet id if updating
-//    if(oldWallet?.id) data.id = oldWallet.id
-    
-//    setLoading(true)
-//    const res = await createOrUpdateWallet(data)
-//    setLoading(false)
-  //  console.log('result: ', res )
-//    if(res.success){
-//      router.back()
-//    } else {
-//        Alert.alert("Wallet", res.msg)
-    //}
+  if(!walletId || !date || !amount || (type == 'expense' && !category)) {
+    Alert.alert("Transaction" , "Please fill all required fields")
+    return
+  }
+
+ // console.log("Good to go")
+  let transactionData: TransactionType = {
+    type,
+    amount,
+    description,
+    category,
+    date,
+    walletId,
+    image,
+    uid: user?.uid,
+  }
+
+    console.log("Transaction Data: ", transactionData)
+
+    // to do : include transaction id for updating
+    setLoading(true)
+    const res = await createOrUpdateTransaction(transactionData)
+
+    setLoading(false)
+    if(res.success){
+      router.back()
+    } else {
+      Alert.alert("Transaction", res.msg )
+    }
 }
 
-
-
-
+const scrollToInput = (inputRef: any) => {
+  setTimeout(() => {
+    inputRef.current?.measure((x: number, y: number, width: number, height: number, pageX: number, pageY: number) => {
+      scrollViewRef.current?.scrollTo({ y: pageY - 100, animated: true })
+    })
+  }, 300)
+}
 
   return (
     <ModalWrapper>
@@ -102,13 +120,22 @@ const onSubmit = async () => {
             style={{ marginBottom: spacingY._10 }}
            />
 
+           <KeyboardAvoidingView 
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 100 : 20}>
+
           {/* form */}
 
-        <ScrollView contentContainerStyle={styles.form} showsVerticalScrollIndicator={false}>
+        <ScrollView
+          ref={scrollViewRef}
+          contentContainerStyle={styles.form} 
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled">
           
           
           <View style={styles.inputContainer}>
-              <Typo color={colors.neutral200}>Transaction Type</Typo>
+              <Typo color={colors.neutral200} size={16}>Transaction Type</Typo>
              {/*  drop down list   */}
              <Dropdown
                 style={styles.dropdownContainer}
@@ -132,7 +159,7 @@ const onSubmit = async () => {
           </View>
 
           <View style={styles.inputContainer}>
-              <Typo color={colors.neutral200}>Wallets</Typo>
+              <Typo color={colors.neutral200} size={16}>Wallets</Typo>
              {/*  drop down list   */}
              <Dropdown
                 style={styles.dropdownContainer}
@@ -141,7 +168,7 @@ const onSubmit = async () => {
           selectedTextStyle={styles.dropdownSelectedText}
           iconStyle={styles.dropdownIcon}
           data={wallets.map(wallet=> ({
-            label: `${wallet?.name} ($${wallet.amount})`,
+            label: `${wallet?.name} (QAR ${wallet.amount})`,
             value: wallet?.id,
           }))}
           maxHeight={300}
@@ -162,7 +189,7 @@ const onSubmit = async () => {
           {
             transaction.type == "expense" && (
                 <View style={styles.inputContainer}>
-                        <Typo color={colors.neutral200}>Expense Categories</Typo>
+                        <Typo color={colors.neutral200} size={16}>Expense Categories</Typo>
                         <Dropdown
                             style={styles.dropdownContainer}
                             activeColor={colors.neutral700}
@@ -189,7 +216,7 @@ const onSubmit = async () => {
           {/* Date & Time  */}
 
           <View style={styles.inputContainer}>
-              <Typo color={colors.neutral200}>Date</Typo>
+              <Typo color={colors.neutral200} size={16}>Date</Typo>
               {
                 !showDatePicker && (
                     <Pressable 
@@ -233,18 +260,40 @@ const onSubmit = async () => {
                 }  
           </View>
 
+                  { /* amount */}
 
+                <View style={styles.inputContainer} ref={amountInputRef}>
+                  <Typo color={colors.neutral200} size={16}>Amount</Typo>
+                  <Input 
+                    // placeholder='Salary'
+                    keyboardType="numeric"  
+                    value={transaction.amount?.toString()}
+                    onChangeText={(value) => setTransaction({...transaction, amount: Number(value.replace(/[^0-9]/g, ""))})}
+                    onFocus={() => scrollToInput(amountInputRef)}
+                  />
+                </View>
 
-
-          <View style={styles.inputContainer}>
-              <Typo color={colors.neutral200}>Transaction Icon</Typo>
-              <ImageUpload 
-                file={transaction.image}
-                onSelect={(emoji) => setTransaction({...transaction, image: emoji})}
-                placeholder="Choose transaction icon"
-              />
-          </View>
+                <View style={styles.inputContainer} ref={descriptionInputRef}>
+                  <View style={styles.flexRow}>
+                  <Typo color={colors.neutral200} size={16}>Description</Typo>
+                  <Typo color={colors.neutral500} size={14}>(optional)</Typo>
+                  </View>
+                  <Input 
+                    placeholder='ex: Wifi bill for August'
+                    value={transaction.description}
+                    multiline
+                    containerStyle={{
+                      flexDirection: 'row',
+                      height: verticalScale(100),
+                      alignItems: 'flex-start',
+                      paddingVertical: 15,
+                    }}
+                    onChangeText={(value) => setTransaction({...transaction, description: value,})}
+                    onFocus={() => scrollToInput(descriptionInputRef)}
+                  />
+                </View>
         </ScrollView>
+        </KeyboardAvoidingView>
       </View>
       <View style={styles.footer}>
           <Button onPress={onSubmit} style={{ flex: 1}}>

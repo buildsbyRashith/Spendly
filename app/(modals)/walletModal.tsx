@@ -4,7 +4,7 @@ import ModalWrapper from '@/components/ModalWrapper'
 import { colors, spacingX, spacingY } from '@/constants/theme'
 import { scale, verticalScale } from '@/utils/styling'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { ActivityIndicator, Alert, ScrollView, StyleSheet, Text, TouchableOpacity, View, Image } from 'react-native'
 import Typo from '@/components/Typo'
 import Input from '@/components/Input'
 import { WalletType } from '@/types'
@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/authContext'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import ImageUpload from '@/components/ImageUpload'
 import { createOrUpdateWallet } from '@/services/walletService'
+import LottieView from 'lottie-react-native'
 
 
 const WalletModal = () => {
@@ -26,6 +27,7 @@ const [wallet, setWallet] = useState<WalletType>({
 })
 
 const [loading, setLoading] = useState(false)
+const [showSuccess, setShowSuccess] = useState(false)
 
 const oldWallet: { name: string; image: string; id: string  } = 
   useLocalSearchParams()
@@ -60,7 +62,11 @@ const onSubmit = async () => {
     setLoading(false)
   //  console.log('result: ', res )
     if(res.success){
+      setShowSuccess(true)
+      setTimeout(() => {
+        setShowSuccess(false)
       router.back()
+      }, 2000) // Show GIF for 2 seconds
     } else {
         Alert.alert("Wallet", res.msg)
     }
@@ -104,9 +110,14 @@ const onSubmit = async () => {
       </View>
       
       {/* loading overlay */}
-      {loading && (
-        <View style={styles.loadingOverlay} pointerEvents="auto">
-          <ActivityIndicator size="large" color={colors.primary} />
+      {showSuccess && (
+        <View style={styles.successOverlay} pointerEvents="none">
+          <LottieView 
+                style={{ width: 250, height: 250 }}      
+                source={require("../../assets/images/Success.json")}
+                autoPlay={true}
+                loop={true}
+                />
         </View>
       )}
     </ModalWrapper>
@@ -181,5 +192,18 @@ const styles = StyleSheet.create({
 
   inputContainer: {
     gap: spacingY._10,
+  },
+
+  successOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10000,
+  },
+  
+  successGif: {
+    width: scale(150),
+    height: scale(150),
   },
 })

@@ -1,13 +1,15 @@
 import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Typo from './Typo'
-import { TransactionItemProps, TransactionListType } from '@/types'
+import { TransactionItemProps, TransactionListType, TransactionType } from '@/types'
 import { colors, radius, spacingX, spacingY } from '@/constants/theme'
 import { verticalScale } from '@/utils/styling'
 import { FlashList } from '@shopify/flash-list'
 import Loading from './Loading'
-import { expenseCategories } from '@/constants/data'
+import { expenseCategories, incomeCategory } from '@/constants/data'
 import Animated, { FadeInDown } from 'react-native-reanimated'
+import { Timestamp } from 'firebase/firestore'
+import { useRouter } from 'expo-router'
 
 
 const TransactionList = ({
@@ -17,7 +19,23 @@ const TransactionList = ({
   emptyListMessage
 }: TransactionListType) => {
 
-  const handleClick = () => {
+  const router = useRouter()
+
+  const handleClick = (item: TransactionType) => {
+    router.push({
+      pathname: "/(modals)/transactionModal",
+      params: {
+        id: item?.id,
+        type: item?.type,
+        amount: item?.amount?.toString(),
+        category: item?.category,
+        date: (item?.date as Timestamp)?.toDate()?.toISOString(),
+        description: item?.description,
+        image: item?.image,
+        uid: item?.uid,
+        walletId: item?.walletId,
+      }
+    })
     // to do : open transaction details
   }
 
@@ -63,8 +81,14 @@ const TransactionItem = ({
   handleClick
 }: TransactionItemProps) => {
 
-  let category = expenseCategories["utilities"]
+  let category = item?.type == "income"? incomeCategory : expenseCategories[item.category!]
   const IconComponent = category.icon
+
+  const date = (item?.date as Timestamp)?.toDate()?.toLocaleDateString("en-Gb", {
+    day: "numeric",
+    month: "short",
+}) 
+
   return (
   <Animated.View entering={FadeInDown.delay(index * 250)}>
     <TouchableOpacity style={styles.row} onPress={() => handleClick(item)} >
@@ -81,18 +105,20 @@ const TransactionItem = ({
         <View style={styles.categoryDes}>
           <Typo size={17}>{category.label}</Typo>
           <Typo size={12} color={colors.neutral400} textProps={{ numberOfLines: 1 }}>
-            paid wifi bill
+            {item.description}
           </Typo>
         </View>
 
         <View style={styles.amountDate}>
           <Typo 
-            color={colors.primary} 
+            color={item?.type == "income" ? colors.primary : colors.rose} 
             fontWeight="500">
-              +QAR 120
+              {
+                `${item?.type == "income" ? "+ QAR " : "- QAR "} ${item?.amount}`
+              }
           </Typo>
           <Typo size={13} color={colors.neutral400}>
-            12 Aug, 2025
+            {date}
           </Typo>
         </View>
 

@@ -19,6 +19,7 @@ import useFetchData from '@/hooks/useFetchData'
 import { orderBy, where } from 'firebase/firestore'
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { createOrUpdateTransaction } from '@/services/transactionService'
+import LottieView from 'lottie-react-native'
 
 
 const TransactionModal = () => {
@@ -41,15 +42,34 @@ const [transaction, setTransaction] = useState<TransactionType>({
   image: null
 })
 
+
 const [loading, setLoading] = useState(false)
 const [showDatePicker, setShowDatePicker] = useState(false)
+const [showSuccess, setShowSuccess] = useState(false)
 
 const {data: wallets, error: walletError, loading: walletLoading} = useFetchData<WalletType>("wallets", [
   where("uid" , "==", user?.uid ),
   orderBy("created", "desc"),
 ])
 
-const oldTransaction: { name: string; image: string; id: string  } = 
+type paramType = {
+  id: string
+  type: string
+  amount: string
+  category?: string
+  date: string
+  description?: string
+  image?: string
+  walletId: string
+  uid: string
+}
+
+
+
+
+
+
+const oldTransaction: paramType = 
   useLocalSearchParams()
   //console.log('old Wallet: ', oldWallet)
 
@@ -60,14 +80,19 @@ const oldTransaction: { name: string; image: string; id: string  } =
        // setShowDatePicker(false)
   }
 
-//    useEffect(() => {
-//  if(oldTransaction?.id){
-//    setTransaction({
-//      name: oldTransaction?.name
-//      image: oldTransaction?.image,
-//    })
-//  }
-//}, [])
+  useEffect(() => {
+      if(oldTransaction?.id){
+        setTransaction({
+              type: oldTransaction?.type,
+              amount: Number(oldTransaction?.amount),
+              description: oldTransaction?.description || "",
+              category: oldTransaction?.category,
+              date: new Date(oldTransaction?.date),
+              walletId: oldTransaction?.walletId,
+              image: oldTransaction?.image,
+        })
+      }
+  }, [])
 
 const onSubmit = async () => {
   const {type, amount, description, category, date, walletId, image} = transaction
@@ -97,7 +122,11 @@ const onSubmit = async () => {
 
     setLoading(false)
     if(res.success){
+      setShowSuccess(true)
+      setTimeout(() => {
+        setShowSuccess(false)
       router.back()
+      }, 5000) // Show GIF for 5 seconds
     } else {
       Alert.alert("Transaction", res.msg )
     }
@@ -303,9 +332,26 @@ const scrollToInput = (inputRef: any) => {
       </View>
       
       {/* loading overlay */}
-      {loading && (
-        <View style={styles.loadingOverlay} pointerEvents="auto">
-          <ActivityIndicator size="large" color={colors.primary} />
+      {showSuccess && (
+              <View style={styles.successOverlay} pointerEvents="none">
+                <Typo 
+                    size={30} 
+                    fontWeight="700" 
+                    color={colors.white}
+                    style={{ marginTop: spacingY._20 }}
+                    >
+                    {transaction.type == "expense" 
+                    ? "It's a Spend!" 
+                    : "That's a Save!"}
+                </Typo>
+                <LottieView 
+                      style={{ width: 250, height: 250 }}      
+                      source={ transaction.type == "expense"
+                        ? require("../../assets/images/Sad Cat.json")
+                        : require("../../assets/images/Happy Pig.json")}
+                      autoPlay={true}
+                      loop={true}
+                />
         </View>
       )}
     </ModalWrapper>
@@ -457,5 +503,18 @@ const styles = StyleSheet.create({
     iosDatePicker: {
 
     },
+
+    successOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 10000,
+  },
+  
+  successGif: {
+    width: scale(150),
+    height: scale(150),
+  },
 
 })

@@ -4,6 +4,7 @@ import Typo from '@/components/Typo'
 import { colors, spacingX, spacingY } from '@/constants/theme'
 import { verticalScale } from '@/utils/styling'
 import { useRouter } from 'expo-router'
+import LottieView from 'lottie-react-native'
 import React from 'react'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
 import Animated, { FadeIn, FadeInDown } from 'react-native-reanimated'
@@ -23,12 +24,12 @@ const Welcome = () => {
             <Typo fontWeight={500}>Sign in</Typo>
           </TouchableOpacity>
 
-          <Animated.Image
-            entering= {FadeIn.duration(1000)} 
-            source={require('../../assets/images/welcome.png')}
-            style={styles.welcomeImage}
-            resizeMode='contain'
-          />
+          <LottieView 
+                    style={{ width: 350, height: 350, alignSelf: 'center', marginTop: 100 }}      
+                    source={require("../../assets/images/Onboarding.json")}
+                    autoPlay={true}
+                    loop={true}
+                  />
 
         </View>
 

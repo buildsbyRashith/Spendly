@@ -3,7 +3,11 @@ import { colors } from '@/constants/theme'
 import { useAuth } from '@/contexts/authContext'
 import { useRouter } from 'expo-router'
 import React, { useEffect, useRef, useState } from 'react'
-import { Image, StyleSheet, View } from 'react-native'
+import { Animated, Image, StyleSheet, View } from 'react-native'
+import LottieView from 'lottie-react-native'
+
+
+
 
 const index = () => {
 
@@ -11,7 +15,16 @@ const { initialized, user } = useAuth()
   const router = useRouter()
   const startRef = useRef<number>(Date.now())
   const [navigated, setNavigated] = useState(false)
-  const MIN_SPLASH_MS = 2000
+  const [animationLoaded, setAnimationLoaded] = useState(false)
+  const lottieRef = useRef<LottieView>(null)
+  const MIN_SPLASH_MS = 1000
+
+  useEffect(() => {
+    // Start animation immediately when loaded
+    if (animationLoaded && lottieRef.current) {
+      lottieRef.current.play()
+    }
+  }, [animationLoaded])
 
   useEffect(() => {
     if (!initialized || navigated) return
@@ -39,6 +52,14 @@ const { initialized, user } = useAuth()
           resizeMode='contain'
           source={require('../assets/images/splashnew.png')}
         />
+        <LottieView
+          ref={lottieRef}
+          style={styles.lottie}      
+          source={require("../assets/images/Runing.json")}
+          autoPlay={true}    
+          loop={true}
+          onAnimationLoaded={() => setAnimationLoaded(true)}
+        />
       </View>
     )
   }
@@ -59,5 +80,13 @@ const styles = StyleSheet.create({
     logo: {
         height: '50%',
         aspectRatio: 1,
+    },
+
+    lottie: {
+        position: 'absolute',
+        width: 950,
+        height: 950,
+        top: '50%',
+        marginTop: -475, // Half of height to center
     },
 })

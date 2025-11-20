@@ -10,12 +10,23 @@ import * as Icons from 'phosphor-react-native'
 import HomeCard from '@/components/HomeCard'
 import TransactionList from '@/components/TransactionList'
 import Button from '@/components/Button'
+import { limit, orderBy, where } from 'firebase/firestore'
+import { TransactionType, WalletType } from '@/types'
+import useFetchData from '@/hooks/useFetchData'
 
 const Home = () => {
 
   const router = useRouter()
 
   const { user } = useAuth()
+
+  const constraints = [
+    where("uid", "==", user?.uid),
+    orderBy("date", "desc"),
+    limit(30),
+  ]
+
+  const {data: recentTransactions, error, loading: transactionsLoading,} = useFetchData<TransactionType>("transactions", constraints )
   return (
     <ScreenWrapper>
       <View style={styles.container}>
@@ -49,9 +60,9 @@ const Home = () => {
 
           <TransactionList 
               title='Recent Transactions' 
-              data={[1,2,3,4,5,6]} 
+              data={recentTransactions} 
               emptyListMessage="No recent transactions added yet" 
-              loading={false} 
+              loading={transactionsLoading} 
           />
 
       </ScrollView>

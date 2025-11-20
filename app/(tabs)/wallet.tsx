@@ -12,6 +12,8 @@ import { deleteDoc, orderBy, where } from 'firebase/firestore'
 import { useAuth } from '@/contexts/authContext'
 import Loading from '@/components/Loading'
 import WalletListItem from '@/components/WalletListItem'
+import LottieView from 'lottie-react-native'
+
 
 const Wallet = () => {
 
@@ -59,7 +61,7 @@ const getTotalBalance = () =>
             {/*Wallet List */}
 
           {loading && <Loading />}
-          <FlatList 
+          <FlatList
             data={wallets}
             renderItem={({item, index})=> {
               return <WalletListItem item={item} index={index} router={router} />

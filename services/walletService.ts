@@ -1,6 +1,6 @@
 import { ResponseType, WalletType } from "@/types";
 import { uploadFileToCloudinary } from "./imageServices";
-import { collection, doc, setDoc, deleteDoc} from "firebase/firestore";
+import { collection, doc, setDoc, deleteDoc, query, where, getDocs, writeBatch} from "firebase/firestore";
 import { firestore } from "@/config/firebase";
 
 export const createOrUpdateWallet = async (
@@ -39,12 +39,52 @@ export const createOrUpdateWallet = async (
 
 
 // new: deleteWallet
-export const deleteWallet = async (id?: string): Promise<ResponseType> => {
+export const deleteWallet = async (walletId?: string): Promise<ResponseType> => {
   try {
-    if (!id) return { success: false, msg: "Missing wallet id" }
-    const walletRef = doc(firestore, "wallets", id)
+    if (!walletId) return { success: false, msg: "Missing wallet id" }
+    const walletRef = doc(firestore, "wallets", walletId)
     await deleteDoc(walletRef)
-    return { success: true, data: { id } }
+
+    deleteTransactionsByWalletId(walletId)
+
+    return { success: true, msg: "Wallet deleted successfully" }
+  } catch (error: any) {
+    return { success: false, msg: error.message }
+  }
+}
+
+// new: deleteWalletTransactions
+export const deleteTransactionsByWalletId = async (walletId?: string): Promise<ResponseType> => {
+  try {
+    let hasmoreTransactions = true
+
+    while (hasmoreTransactions) {
+      const transactionsQuery = query(
+        collection(firestore, "transactions"),
+        where("walletId", "==", walletId)
+      )
+      const transactionsSnapshot = await getDocs(transactionsQuery)
+      if (transactionsSnapshot.size == 0) {
+        hasmoreTransactions = false
+        break
+      }
+
+      const batch = writeBatch(firestore)
+
+      transactionsSnapshot.forEach((transactionDoc)=> {
+        batch.delete(transactionDoc.ref)
+      })
+      await batch.commit()
+      console.log(`Deleted ${transactionsSnapshot.size} transactions`)
+    }
+    return {
+      success: true,
+      msg: "All transactions for the wallet have been deleted successfully",
+    }
+
+
+
+    return { success: true, msg: "Wallet deleted successfully" }
   } catch (error: any) {
     return { success: false, msg: error.message }
   }

@@ -18,8 +18,9 @@ import { expenseCategories, transactionTypes } from '@/constants/data'
 import useFetchData from '@/hooks/useFetchData'
 import { orderBy, where } from 'firebase/firestore'
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
-import { createOrUpdateTransaction } from '@/services/transactionService'
+import { createOrUpdateTransaction, deleteTransaction } from '@/services/transactionService'
 import LottieView from 'lottie-react-native'
+import * as Icons from 'phosphor-react-native'
 
 
 const TransactionModal = () => {
@@ -114,9 +115,9 @@ const onSubmit = async () => {
     uid: user?.uid,
   }
 
-    console.log("Transaction Data: ", transactionData)
+    
 
-    // to do : include transaction id for updating
+    if (oldTransaction?.id) transactionData.id = oldTransaction.id
     setLoading(true)
     const res = await createOrUpdateTransaction(transactionData)
 
@@ -140,7 +141,36 @@ const scrollToInput = (inputRef: any) => {
   }, 300)
 }
 
-  return (
+const onDelete = async () => {
+  if (!oldTransaction?.id) return
+  setLoading(true)
+  const res = await deleteTransaction(oldTransaction?.id, oldTransaction?.walletId)
+  setLoading(false)
+  if(res.success){
+    router.back()
+  } else {
+    Alert.alert("Transaction", res.msg )
+  }
+}
+
+const showDeleteAlert = () => {
+  Alert.alert("Confirm", "Are you sure you want to delete this transaction? \nThis action cannot be undone.", 
+    [
+      {
+        text: "Cancel",
+        style: "cancel",
+        onPress: () => {console.log("Cancel Pressed")}
+      },
+      {
+        text: "Delete",
+        style: "destructive",
+        onPress: () => onDelete()
+      },
+    ])
+}
+ 
+
+return (
     <ModalWrapper>
       <View style={styles.container}>
           <Header 
@@ -325,6 +355,23 @@ const scrollToInput = (inputRef: any) => {
         </KeyboardAvoidingView>
       </View>
       <View style={styles.footer}>
+          {
+            oldTransaction?.id && !loading && (
+              <Button
+                onPress={showDeleteAlert}
+                style={{
+                  backgroundColor: colors.rose,
+                  paddingHorizontal: spacingX._15,
+                }}
+              >
+                <Icons.TrashIcon 
+                  color={colors.white}
+                  size={verticalScale(24)}
+                  weight="bold"
+                />
+              </Button>
+            )
+          }
           <Button onPress={onSubmit} style={{ flex: 1}}>
             <Typo color={colors.black} fontWeight={"700"} size={18}>
               {loading ? 'Hang on...' : oldTransaction?.id ? 'Update Transaction' : 'Add Transaction'}</Typo>

@@ -24,7 +24,7 @@ useEffect(() => {
   if (!walletLoading) {
     Animated.timing(fadeAnim, {
       toValue: 0,
-      duration: 3000,
+      duration: 2000,
       useNativeDriver: true,
     }).start()
   }
@@ -33,8 +33,9 @@ useEffect(() => {
 const getTotals = () => {
  return wallets.reduce((totals: any, item: WalletType) => {
         totals.balance = totals.balance + Number(item.amount)
-        totals.income = totals.income + Number(item.totalIncome)
-        totals.expenses = totals.expenses + Number(item.totalExpenses)
+        // Only include totalIncome and totalExpenses (transfers are excluded)
+        totals.income = totals.income + Number(item.totalIncome || 0)
+        totals.expenses = totals.expenses + Number(item.totalExpenses || 0)
         return totals
   }, {balance: 0, income: 0, expenses: 0})
 }

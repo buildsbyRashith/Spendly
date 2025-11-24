@@ -134,7 +134,7 @@ const Profile = () => {
                           <Animated.View
                                 // added key here; prefer a unique stable id (title used as example)
                                 key={item.title ?? index}
-                                entering={FadeInDown.delay(index*50).springify().damping(14)}
+                                entering={FadeInDown.delay(index*50)}
                                 style={styles.listItem}>
                             <TouchableOpacity style={styles.flexRow}  onPress={() => handlePress(item) }>
                                 {/* icon */}

@@ -6,7 +6,7 @@ import { colors, radius, spacingX, spacingY } from '@/constants/theme'
 import { verticalScale } from '@/utils/styling'
 import { FlashList } from '@shopify/flash-list'
 import Loading from './Loading'
-import { expenseCategories, incomeCategory } from '@/constants/data'
+import { expenseCategories, incomeCategory, transferCategory } from '@/constants/data'
 import Animated, { FadeInDown } from 'react-native-reanimated'
 import { Timestamp } from 'firebase/firestore'
 import { useRouter } from 'expo-router'
@@ -34,9 +34,9 @@ const TransactionList = ({
         image: item?.image,
         uid: item?.uid,
         walletId: item?.walletId,
+        toWalletId: item?.toWalletId || "",
       }
     })
-    // to do : open transaction details
   }
 
 
@@ -81,8 +81,17 @@ const TransactionItem = ({
   handleClick
 }: TransactionItemProps) => {
 
-  let category = item?.type == "income"? incomeCategory : expenseCategories[item.category!]
-  const IconComponent = category.icon
+  // Add this to debug
+  if (item?.type === "transfer") {
+    console.log("Transfer item:", item)
+  }
+
+  let category = item?.type == "income"
+      ? incomeCategory 
+    : item?.type == "transfer"
+    ? transferCategory
+    : expenseCategories[item.category!]
+  const IconComponent = category?.icon
 
   const date = (item?.date as Timestamp)?.toDate()?.toLocaleDateString("en-Gb", {
     day: "numeric",
@@ -92,7 +101,7 @@ const TransactionItem = ({
   return (
   <Animated.View entering={FadeInDown.delay(index * 250)}>
     <TouchableOpacity style={styles.row} onPress={() => handleClick(item)} >
-      <View style={[styles.icon, { backgroundColor: category.bgColor}]}>
+      <View style={[styles.icon, { backgroundColor: category?.bgColor || colors.neutral500}]}>
         {IconComponent && (
           <IconComponent 
             size={verticalScale(25)}
@@ -103,18 +112,26 @@ const TransactionItem = ({
       </View>
 
         <View style={styles.categoryDes}>
-          <Typo size={17}>{category.label}</Typo>
+          <Typo size={17}>{category?.label || "Transfer"}</Typo>
           <Typo size={12} color={colors.neutral400} textProps={{ numberOfLines: 1 }}>
-            {item.description}
+            {item.description || "Wallet transfer"}
           </Typo>
         </View>
 
         <View style={styles.amountDate}>
           <Typo 
-            color={item?.type == "income" ? colors.primary : colors.rose} 
+            color={
+              item?.type == "income" 
+                ? colors.primary 
+                : item?.type == "transfer"
+                ? colors.neutral300
+                : colors.rose
+            } 
             fontWeight="500">
               {
-                `${item?.type == "income" ? "+ QAR " : "- QAR "} ${item?.amount}`
+                item?.type == "transfer"
+                  ? `QAR ${item?.amount || 0 }`
+                  : `${item?.type == "income" ? "+ QAR " : "- QAR "} ${item?.amount || 0 }`
               }
           </Typo>
           <Typo size={13} color={colors.neutral400}>
@@ -134,8 +151,6 @@ export default TransactionList
 const styles = StyleSheet.create({
   container: {
     gap: spacingY._17,
-   // flex: 1,
-   // backgroundColor: "red",
   },
 
   list: {

@@ -17,7 +17,7 @@ const { initialized, user } = useAuth()
   const [navigated, setNavigated] = useState(false)
   const [animationLoaded, setAnimationLoaded] = useState(false)
   const lottieRef = useRef<LottieView>(null)
-  const MIN_SPLASH_MS = 1000
+  const MIN_SPLASH_MS = 5000
 
   useEffect(() => {
     // Start animation immediately when loaded

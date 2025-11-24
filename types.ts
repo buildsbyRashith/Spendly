@@ -73,6 +73,7 @@ export type TransactionType = {
   image?: any;
   uid?: string;
   walletId: string;
+  toWalletId?: string; // Add this for transfers
 };
 
 export type CategoryType = {
